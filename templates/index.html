@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Collector | Project Portal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --card-bg: #1e293b;
+            --accent: #3b82f6;     /* Blue */
+            --accent-hover: #2563eb;
+            --success: #10b981;    /* Green */
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --glass: rgba(30, 41, 59, 0.7);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Inter, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* --- HEADER --- */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background-color: var(--glass);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #334155;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo i { color: var(--accent); }
+
+        .nav-actions .btn-add {
+            background-color: var(--accent);
+            color: white;
+            padding: 10px 24px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+        }
+        .nav-actions .btn-add:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-2px);
+        }
+
+        /* --- MAIN CONTENT --- */
+        main {
+            flex: 1; /* Pushes footer down */
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem 0;
+            border-bottom: 1px solid #334155;
+        }
+        .hero h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .hero p { color: var(--text-muted); font-size: 1.1rem; }
+
+        /* --- DASHBOARD GRID --- */
+        .grid-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .grid-header h2 { font-size: 1.5rem; color: var(--text-main); }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        .file-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            position: relative;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 1px solid #334155;
+            display: flex;
+            flex-direction: column;
+            text-decoration: none; /* Remove underline from link */
+        }
+
+        .file-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            border-color: var(--accent);
+        }
+
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .icon-area { font-size: 2.5rem; }
+        
+        .badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border-radius: 4px;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .file-info h3 { margin: 0 0 8px 0; font-size: 1.2rem; color: white; }
+        .file-info p { margin: 0; font-size: 0.9rem; color: var(--text-muted); line-height: 1.4; }
+        .file-info .timestamp { 
+            font-size: 0.75rem; 
+            color: #64748b; 
+            margin-top: 12px; 
+            display: block;
+            border-top: 1px solid #334155;
+            padding-top: 12px;
+        }
+
+        /* --- FOOTER --- */
+        footer {
+            background-color: #0b1120;
+            padding: 2rem;
+            text-align: center;
+            border-top: 1px solid #334155;
+            margin-top: 3rem;
+        }
+        footer p { color: var(--text-muted); font-size: 0.9rem; }
+        .footer-links {
+            margin-top: 10px;
+        }
+        .footer-links a {
+            color: var(--accent);
+            text-decoration: none;
+            margin: 0 10px;
+            font-size: 0.9rem;
+        }
+        .footer-links a:hover { text-decoration: underline; }
+
+        /* --- MODAL --- */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 100; 
+            left: 0; top: 0; width: 100%; height: 100%; 
+            background-color: rgba(0,0,0,0.8); 
+            backdrop-filter: blur(4px);
+        }
+        .modal-content {
+            background-color: var(--card-bg);
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 450px;
+            position: relative;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 1px solid #334155;
+        }
+        .close { position: absolute; right: 20px; top: 15px; font-size: 28px; cursor: pointer; color: var(--text-muted); }
+        .close:hover { color: white; }
+        
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0 20px 0;
+            background: #0f172a;
+            border: 1px solid #334155;
+            color: white;
+            border-radius: 6px;
+            outline: none;
+        }
+        input:focus { border-color: var(--accent); }
+        
+        button[type="submit"] {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--success);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        button[type="submit"]:hover { background-color: #059669; }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            <i class="fa-solid fa-layer-group"></i> TaskCollector
+        </div>
+        <div class="nav-actions">
+            <button class="btn-add" onclick="openModal()">
+                <i class="fa-solid fa-cloud-arrow-up"></i> Submit Project
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <div class="hero">
+            <h1>Student Submissions</h1>
+            <p>Upload your project folders directly to the server. All files are automatically zipped.</p>
+        </div>
+
+        <div class="grid-header">
+            <h2>Recent Uploads</h2>
+            <span style="color: var(--text-muted);">Total: {{ submissions|length }}</span>
+        </div>
+
+        <div class="grid-container">
+            {% for sub in submissions %}
+            <a href="/uploads/{{ sub['Filename'] }}" class="file-card" target="_blank">
+                <div class="card-top">
+                    <div class="icon-area">
+                        {% if '.zip' in sub['Filename'] %}
+                            <i class="fa-solid fa-file-zipper" style="color: #fbbf24;"></i>
+                        {% elif '.pdf' in sub['Filename'] %}
+                            <i class="fa-solid fa-file-pdf" style="color: #ef4444;"></i>
+                        {% else %}
+                            <i class="fa-solid fa-file-code" style="color: var(--accent);"></i>
+                        {% endif %}
+                    </div>
+                    <span class="badge">Submitted</span>
+                </div>
+                
+                <div class="file-info">
+                    <h3>{{ sub['Title'] }}</h3>
+                    <p><i class="fa-solid fa-user"></i> {{ sub['Name'] }}</p>
+                    <p><i class="fa-solid fa-id-card"></i> {{ sub['Roll No'] }}</p>
+                    <span class="timestamp">
+                        <i class="fa-regular fa-clock"></i> {{ sub['Timestamp'] }}
+                    </span>
+                </div>
+            </a>
+            {% else %}
+                <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted);">
+                    <i class="fa-solid fa-folder-open" style="font-size: 3rem; margin-bottom: 10px;"></i>
+                    <p>No projects submitted yet.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Task Collector Portal. All rights reserved.</p>
+        <div class="footer-links">
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Service</a>
+            <a href="#">Support</a>
+        </div>
+    </footer>
+
+    <div id="uploadModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2 style="margin-top: 0; color: var(--accent);">Submit Project</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">
+                Select your project folder. It will be zipped automatically.
+            </p>
+            <form action="/submit" method="POST" enctype="multipart/form-data">
+                <label>Full Name</label>
+                <input type="text" name="name" required placeholder="Abhay">
+
+                <label>Roll Number</label>
+                <input type="text" name="roll_no" required placeholder="123">
+
+                <label>Project Title</label>
+                <input type="text" name="project_title" required placeholder="Python Calculator">
+
+                <label>Select Project Folder</label>
+                <input type="file" name="project_files" webkitdirectory directory multiple required 
+                       style="padding: 10px; border: 1px dashed #334155;">
+
+                <button type="submit">Upload & Zip</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const modal = document.getElementById("uploadModal");
+        function openModal() { modal.style.display = "block"; }
+        function closeModal() { modal.style.display = "none"; }
+        window.onclick = function(event) {
+            if (event.target == modal) { modal.style.display = "none"; }
+        }
+    </script>
+</body>
+</html>
